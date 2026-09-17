@@ -1,0 +1,255 @@
+Table users {
+  id uuid [pk, note: 'UUID v7 — time-stamp sortable']
+  email_id varchar(255) [not null, unique]
+  password varchar(255) [not null]
+  country_code varchar(255) [note: 'One-to-one mapping with country code list']
+  mobile_no bigint [not null, unique, note: 'Long integer']
+  created_at datetime
+  updated_at datetime
+  role enum('Admin', 'Member')
+  status enum('Active', 'Inactive', 'Deleted')
+  last_login_dt datetime [default: `CURRENT_TIMESTAMP`]
+  last_active_at datetime [default: `CURRENT_TIMESTAMP`]
+  deleted_at datetime [default: null]
+  longitude_dim double [note: 'Auto-fetched']
+  latitude_dim double [note: 'Auto-fetched']
+  // is_email_verified bool
+  // email_verified_at timestamp
+}
+
+Table features {
+  id uuid [pk]
+  name varchar
+  
+}
+Table user_profile_features {
+  user_id uuid [pk, ref:> users.id, note: 'On delete cascade']
+  feature_type varchar 
+  is_active bool
+}
+
+Table user_profile {
+  user_id uuid [pk, ref:- users.id, note: 'On delete cascade']
+  name_first varchar(255)
+  name_middle varchar(255)
+  name_last varchar(255)
+  name_full varchar(255) [note: 'name_first name_middle name_last']
+  dob date [note: 'YYYYMMDD']
+  gender enum('Male', 'Female', 'Undisclosed')
+  bio varchar(300)
+  profession varchar(255)
+  city_id varchar(255)
+  pincode bigint
+  profile_photo_uri varchar(2048) [note: 'Image stored in Cloudflare R2 bucket']
+  created_at datetime
+  updated_at datetime
+}
+
+Table interests{
+  name varchar [pk]
+  category enum('Interest1')
+}
+
+Table user_interests {
+  id uuid [pk, ref: > users.id, note: 'On delete cascade']
+  user_id uuid [ ref: > users.id, note: 'On delete cascade']
+  interest varchar [ ref: > interests.name, note: 'On delete cascade, On Change Update']
+}
+
+Table languages {
+  name varchar [pk]
+}
+
+Table user_languages {
+  id uuid [pk]
+  user_id uuid [ ref: > users.id, note: 'On delete cascade']
+  language varchar [ ref: > languages.name, note: 'On delete cascade, On Change Update']
+}
+
+// Table friend_request {
+//   id uuid [pk, ref: > user.id, note: 'On delete cascade']
+//   created_by uuid [ ref: > user.id, note: 'On delete cascade']
+//   request_to uuid [ ref: > user.id, note: 'On delete cascade']
+// }
+Table friendships {
+  id varchar [pk, note: 'Concat sender + receiver after sort']
+  sender_id uuid [ ref: > users.id, note: 'On delete cascade']
+  receiver_id uuid [ ref: > users.id, note: 'On delete cascade']
+  status enum('pending','accepted', 'declined', 'muted','blocked')
+  sent_at timestamp
+  accepted_at timestamp 
+
+  blocked_by uuid [ ref: > users.id, note: 'On delete cascade']
+}
+
+
+
+Table groups {
+  id uuid [pk]
+  name varchar 
+  parent_id uuid 
+  is_admin_managed bool
+  visibility enum('public', 'private','invite_only')
+  description varchar
+  status varchar
+  created_by uuid [ ref: > users.id, note: 'On delete cascade']
+}
+
+Table group_interests {
+  group_id uuid [ ref: > groups.id, note: 'On delete cascade']
+  interest_id varchar [ ref: > interests.name, note: 'On delete cascade']
+}
+
+Table group_members {
+  user_id uuid [ ref: > users.id, note: 'On delete cascade']
+  group_id uuid [ ref: > groups.id, note: 'On delete cascade']
+  is_moderator bool
+  joined_at timestamp
+}
+
+Table posts {
+  id uuid [pk]
+  group_id uuid [ref:>groups.id] 
+  content varchar 
+  type enum 
+  extra_data jsonb
+  user_id uuid [ ref: > users.id, note: 'On delete cascade']
+  visibility varchar
+} 
+
+Table post_interactions {
+  user_id uuid [ ref: > users.id, note: 'On delete cascade']
+  post_id uuid [ref:> posts.id]
+  type varchar 
+  interaction varchar 
+
+  longitude_dim double [note: 'Auto-fetched']
+  latitude_dim double [note: 'Auto-fetched']
+}
+
+Table events {
+    id uuid [pk] 
+    user_id uuid [ ref: > users.id, note: 'On delete cascade']
+    group_id uuid [ref:>groups.id] 
+    starts_at timestamp
+    ends_at timestamp 
+    location varchar 
+    title varchar 
+    description varchar
+    longitude_dim double [note: 'Auto-fetched']
+    latitude_dim double [note: 'Auto-fetched']
+}
+
+Table events_interactions {
+    id uuid [pk] 
+    user_id uuid [ ref: > users.id, note: 'On delete cascade']
+    event_id uuid [ref:>events.id] 
+    type varchar 
+    interaction varchar
+}
+
+
+
+Table chats{ 
+  id uuid [pk]
+  target_type varchar
+  target_id uuid
+  sender_id uuid [ ref: > users.id, note: 'On delete cascade']
+  content varchar 
+  sent_at timestamp 
+  ref_type varchar
+  ref_id uuid
+}
+
+Table assets {
+    id uuid [pk] 
+    target_type varchar
+    target_id uuid 
+    url varchar(2048) [note: 'Image stored in Cloudflare R2 bucket']
+    type varchar
+}
+
+Table notifications {
+    id uuid [pk] 
+    user_id uuid [ ref: > users.id, note: 'On delete cascade']
+    type varchar 
+    content jsonb
+    is_read bool
+    is_archived bool
+}
+
+Table journal_entries {
+    id uuid [pk] 
+    user_id uuid [ ref: > users.id, note: 'On delete cascade']
+    entry_date date [note: 'User can add journal for any date he wants even past dates']
+    title varchar
+    content text
+}
+
+
+Table mood_entries {
+    id uuid [pk] 
+    user_id uuid [ ref: > users.id, note: 'On delete cascade']
+    entry_time timestamp [note: 'User can add mood for any date he wants even past dates']
+    mood varchar [note: 'Later we can use enums']
+    scale number
+}
+
+
+Table user_wellness_activities {
+    id uuid [pk] 
+    user_id uuid [ ref: > users.id, note: 'On delete cascade']
+    entry_time timestamp 
+    content varchar 
+    type varchar 
+}
+
+
+Table user_reports {
+    id uuid [pk] 
+    created_by uuid [ ref: > users.id, note: 'On delete cascade']
+    reported_user uuid [ ref: > users.id, note: 'On delete cascade'] 
+    reported_from varchar [note: 'report can be clicked from chat ui or post ui']
+    incident_time timestamp
+    extra_remarks varchar
+    report_type varchar [note:"We can have enum"]
+    reviewed_by uuid [ ref: > users.id, note: 'On delete cascade']
+    verdict varchar 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

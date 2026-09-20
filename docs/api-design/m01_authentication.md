@@ -1,10 +1,12 @@
-# Authentication API
+# Auth API
 
 **Base URL:** `api/v1`
+
 **FastAPI Router:** `auth.py`
 
-## Associted Tables
-- `users`
+## Associated Tables
+
+### `users`
 
 | Column           | Data Type    | Key / Constraint                | Description                               |
 | ---------------- | ------------ | ------------------------------- | ----------------------------------------- |
@@ -25,12 +27,12 @@
 
 ## APIs
 
-```text id="t4j1qs"
+```text
 POST  /auth/login
 POST  /auth/logout
 POST  /auth/signup
-POST  /auth/refresh           :: Generate new JWT token
-GET   /auth/me                :: Fetch respective user details
+POST  /auth/refresh
+GET   /auth/me
 POST  /auth/forgot-password
 POST  /auth/reset-password
 
@@ -39,16 +41,16 @@ POST  /auth/send-otp
 POST  /auth/verify-otp
 ```
 
-# Login Page
+---
 
 ## 1.1 :: POST `/auth/login`
 
 **Request Body:**
 
-```json id="2mgx5q"
+```json
 {
-  "emailId": "aarav@buddyadda.com",
-  "mobileNo": 9876543210,
+  "email_id": "aarav@buddyadda.com",
+  "mobile_no": 9876543210,
   "password": "Password123!"
 }
 ```
@@ -57,20 +59,20 @@ POST  /auth/verify-otp
 
 **Status: 200**
 
-```json id="6prv5h"
+```json
 {
   "success": true,
   "message": "Login is successful",
   "data": {
-    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
   }
 }
 ```
 
 **Status: 401**
 
-```json id="0qpj0k"
+```json
 {
   "success": false,
   "message": "Login Failed",
@@ -80,16 +82,20 @@ POST  /auth/verify-otp
 
 **Note:**
 
-* Login using Email or Phone No.
-* JWT Structure: `user-id`, `role`, `expiry-time`, `JTI`, `subject`
+- Login using Email or Phone No.
+- JWT Access Token Structure: `user_id`, `role`, `expiry_time`, `JTI`, `subject`
+- JWT Refresh Token Structure: `user_id`, `expiry_time`, `JTI`, `subject`
+  - `sub` = subject / user identifier (chat | ai-companion | any micro-services)
+  - `exp` = expiration time
+  - `JTI` = unique JWT ID
 
 ## 1.2 :: POST `/auth/logout`
 
 **Request Body:**
 
-```json id="7ofn84"
+```json
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
 ```
 
@@ -97,7 +103,7 @@ POST  /auth/verify-otp
 
 **Status: 200**
 
-```json id="f1r2gj"
+```json
 {
   "success": true,
   "message": "Logout Successful"
@@ -106,7 +112,7 @@ POST  /auth/verify-otp
 
 **Status: 401**
 
-```json id="6gvn2b"
+```json
 {
   "success": false,
   "message": "Logout Failed",
@@ -118,44 +124,42 @@ POST  /auth/verify-otp
 
 **Request Body:**
 
-```json id="tl4h6i"
+```json
 {
-  "emailId": "pooja@example.com",
+  "email_id": "pooja@example.com",
   "password": "SecurePassword123!",
-  "confirm-password": "SecurePassword123!",
-  "countryCode": "+91",
-  "mobileNo": 9100010001,
-  "nameFirst": "Pooja",
-  "nameLast": "Hegde",
+  "confirm_password": "SecurePassword123!",
+  "country_code": "+91",
+  "mobile_no": 9100010001,
+  "name_first": "Pooja",
+  "name_last": "Hegde",
   "gender": "Female",
   "dob": "1996-05-20",
-  "cityId": "Bengaluru",
+  "city_id": "Bengaluru",
   "pincode": 560034,
-  "longitudeDim": 12.9716,
-  "latitudeDim": 77.5946
+  "longitude_dim": 12.9716,
+  "latitude_dim": 77.5946
 }
 ```
-
-**Note:** `confirm-password` should not be stored in the `users` table.
 
 **Response Body:**
 
 **Status: 200**
 
-```json id="9l91a6"
+```json
 {
   "success": true,
   "message": "Account Creation Successful",
   "data": {
-    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
   }
 }
 ```
 
 **Status: 401**
 
-```json id="i91ev6"
+```json
 {
   "success": false,
   "message": "Account Creation Failed",
@@ -163,13 +167,17 @@ POST  /auth/verify-otp
 }
 ```
 
+**Note:**
+
+- `confirm_password` should not be stored in the `users` table.
+
 ## 1.4 :: POST `/auth/refresh`
 
 **Request Body:**
 
-```json id="8p7e88"
+```json
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
 ```
 
@@ -177,26 +185,31 @@ POST  /auth/verify-otp
 
 **Status: 200**
 
-```json id="qrl4s4"
+```json
 {
   "success": true,
   "message": "Token Refresh Successful",
   "data": {
-    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
   }
 }
 ```
 
 **Status: 401**
 
-```json id="l3x5qr"
+```json
 {
   "success": false,
   "message": "Token Refresh Failed",
   "error_message": "Refresh Token is not valid"
 }
 ```
+
+**Note:**
+
+- App automatically logs out the user when refresh token expires.
+- ID and password generate access tokens and refresh tokens.
 
 ## 1.5 :: GET `/auth/me`
 
@@ -206,23 +219,23 @@ POST  /auth/verify-otp
 
 **Status: 200**
 
-```json id="nsfepk"
+```json
 {
   "success": true,
   "message": "User Details Retrieved Successfully",
   "data": {
-    "userId": "USR123456",
-    "emailId": "pooja@example.com",
-    "countryCode": "+91",
-    "mobileNo": 9100010001,
-    "nameFirst": "Pooja",
-    "nameLast": "Hegde",
+    "user_id": "USR123456",
+    "email_id": "pooja@example.com",
+    "country_code": "+91",
+    "mobile_no": 9100010001,
+    "name_first": "Pooja",
+    "name_last": "Hegde",
     "gender": "Female",
     "dob": "1996-05-20",
-    "cityId": "Bengaluru",
+    "city_id": "Bengaluru",
     "pincode": 560034,
-    "longitudeDim": 12.9716,
-    "latitudeDim": 77.5946,
+    "longitude_dim": 12.9716,
+    "latitude_dim": 77.5946,
     "role": "USER"
   }
 }
@@ -230,7 +243,7 @@ POST  /auth/verify-otp
 
 **Status: 401**
 
-```json id="5jq4o7"
+```json
 {
   "success": false,
   "message": "Unauthorized",
@@ -250,21 +263,19 @@ POST  /auth/verify-otp
 
 **Request Body:**
 
-```json id="x4vkya"
+```json
 {
-  "emailId": "pooja@example.com",
-  "mobileNo": "9000080000",
-  "countryCode": "+91"
+  "email_id": "pooja@example.com",
+  "mobile_no": "9000080000",
+  "country_code": "+91"
 }
 ```
-
-`mobileNo` and `countryCode` are optional — to be decided later.
 
 **Response Body:**
 
 **Status: 200**
 
-```json id="3kpsat"
+```json
 {
   "success": true,
   "message": "Password Reset Link Sent Successfully"
@@ -273,7 +284,7 @@ POST  /auth/verify-otp
 
 **Status: 401**
 
-```json id="avb8cr"
+```json
 {
   "success": false,
   "message": "Password Reset Failed",
@@ -281,29 +292,34 @@ POST  /auth/verify-otp
 }
 ```
 
-## 1.7 :: POST `/auth/reset-password`
+**Note:**
 
-**Note:** After successful password reset, redirect the user to the **Login Page**.
+- Validate whether the user exists in the DB.
+- Backend calls `/auth/send-otp` to send OTP through mobile/email.
+- `/auth/verify-otp` validates the user-entered OTP.
+- Frontend prompts for new password and confirm password.
+- Frontend calls `/auth/reset-password`.
+- `mobile_no` and `country_code` are optional — to be decided later.
+
+## 1.7 :: POST `/auth/reset-password`
 
 **Request Body:**
 
-```json id="n0p9vj"
+```json
 {
   "password": "NewPassword123!",
-  "confirm-password": "NewPassword123!",
+  "confirm_password": "NewPassword123!",
   "email_id": "asd@gmail.com",
-  "mobileNo": "9000080000",
-  "countryCode": "+91"
+  "mobile_no": "9000080000",
+  "country_code": "+91"
 }
 ```
-
-`mobileNo` and `countryCode` are optional — to be decided later.
 
 **Response Body:**
 
 **Status: 200**
 
-```json id="j6dg6x"
+```json
 {
   "success": true,
   "message": "Password Reset Successful"
@@ -312,10 +328,15 @@ POST  /auth/verify-otp
 
 **Status: 401**
 
-```json id="34j8va"
+```json
 {
   "success": false,
   "message": "Password Reset Failed",
   "error_message": "Reset Token is not valid"
 }
 ```
+
+**Note:**
+
+- After successful password reset, redirect the user to the **Login Page**.
+- `mobile_no` and `country_code` are optional — to be decided later.

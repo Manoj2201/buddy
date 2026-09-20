@@ -1,4 +1,4 @@
-// LINK :: https://dbdiagram.io/d/BuddyAdda-61506d94825b5b01461390a0
+/// LINK :: https://dbdiagram.io/d/BuddyAdda-61506d94825b5b01461390a0
 
 Table users {
   id uuid [pk, note: 'UUID v7 — time-stamp sortable']

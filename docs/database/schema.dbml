@@ -68,20 +68,21 @@ Table user_languages {
   language varchar [ ref: > languages.name, note: 'On delete cascade, On Change Update']
 }
 
-// Table friend_request {
-//   id uuid [pk, ref: > user.id, note: 'On delete cascade']
-//   created_by uuid [ ref: > user.id, note: 'On delete cascade']
-//   request_to uuid [ ref: > user.id, note: 'On delete cascade']
-// }
-Table friendships {
-  id varchar [pk, note: 'Concat sender + receiver after sort']
-  sender_id uuid [ ref: > users.id, note: 'On delete cascade']
-  receiver_id uuid [ ref: > users.id, note: 'On delete cascade']
-  status enum('pending','accepted', 'declined', 'muted','blocked')
+Table friend_requests {
+  id varchar [pk, note: 'UUID']
+  sender_id uuid [ref: > users.id, note: 'On delete cascade']
+  receiver_id uuid [ref: > users.id, note: 'On delete cascade']
+  status enum('pending', 'accepted', 'declined')
   sent_at timestamp
-  accepted_at timestamp 
+  accepted_at timestamp
+}
 
-  blocked_by uuid [ ref: > users.id, note: 'On delete cascade']
+Table friendships {
+  id varchar [pk, note: 'UUID']
+  from_user uuid [ref: > users.id, note: 'On delete cascade']
+  to_user uuid [ref: > users.id, note: 'On delete cascade']
+  status enum('muted', 'blocked', 'friend', 'un-friend')
+  friend_request_id varchar [ref: > friend_requests.id, note: 'On delete cascade']
 }
 
 

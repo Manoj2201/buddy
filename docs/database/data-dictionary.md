@@ -82,17 +82,37 @@
 | `user_id`  | UUID      | FK → `users.id`       | User identifier; cascade on delete         |
 | `language` | VARCHAR   | FK → `languages.name` | User language; cascade/update relationship |
 
-### 9. `friendships`
+### 9A. `friend_requests`
 
-| Column        | Data Type | Key / Constraint                                      | Description                               |
-| ------------- | --------- | ----------------------------------------------------- | ----------------------------------------- |
-| `id`          | VARCHAR   | PK                                                    | Concatenation of sorted sender + receiver |
-| `sender_id`   | UUID      | FK → `users.id`                                       | Friendship requester                      |
-| `receiver_id` | UUID      | FK → `users.id`                                       | Friendship recipient                      |
-| `status`      | ENUM      | `pending`, `accepted`, `declined`, `muted`, `blocked` | Friendship status                         |
-| `sent_at`     | TIMESTAMP | —                                                     | Request sent time                         |
-| `accepted_at` | TIMESTAMP | —                                                     | Request accepted time                     |
-| `blocked_by`  | UUID      | FK → `users.id`                                       | User who blocked the relationship         |
+| Column        | Data Type | Key / Constraint                  | Description               |
+| ------------- | --------- | --------------------------------- | ------------------------- |
+| `id`          | VARCHAR   | PK                                | UUID                      |
+| `sender_id`   | UUID      | FK → `users.id`                   | Friendship requester      |
+| `receiver_id` | UUID      | FK → `users.id`                   | Friendship recipient      |
+| `status`      | ENUM      | `pending`, `accepted`, `declined` | Friendship Request status |
+| `sent_at`     | TIMESTAMP | —                                 | Request sent time         |
+| `accepted_at` | TIMESTAMP | —                                 | Request accepted time     |
+
+```text
++-------------------+        Accept Request        +-------------------+
+|  friend_requests  | ---------------------------> |    friendships    |
++-------------------+                              +-------------------+
+| sender_id (FK)    |    Deletes request row       | user_id_1 (FK)    |
+| receiver_id (FK)  |    and inserts active pair   | user_id_2 (FK)    |
+| status            |                              | created_at        |
+| created_at        |                              +-------------------+
++-------------------+
+```
+
+### 9B. `friendships`
+
+| Column              | Data Type | Key / Constraint                         | Description                 |
+| ------------------- | --------- | ---------------------------------------- | --------------------------- |
+| `id`                | VARCHAR   | PK                                       | UUID                        |
+| `from_user`         | UUID      | FK → `users.id`                          | User 1                      |
+| `to_user`           | UUID      | FK → `users.id`                          | User 2                      |
+| `status`            | ENUM      | `muted`, `blocked`, `friend`, `un-friend` | Friendship status           |
+| `friend_request_id` | VARCHAR   | FK → `friend_requests.id`                | Reference to friend request |
 
 ### 10. `groups`
 
@@ -249,6 +269,6 @@
 | `reviewed_by`   | UUID      | FK → `users.id`  | User/admin reviewing report         |
 | `verdict`       | VARCHAR   | —                | Review outcome                      |
 
-**Total: 23 active tables.**
+**Total: 24 active tables.**
 
 One schema issue worth flagging: in `user_interests`, `id` is defined as both the **primary key and a foreign key to `users.id`**. That looks accidental because `user_id` already references `users.id`; normally `id` would just be the independent UUID PK.

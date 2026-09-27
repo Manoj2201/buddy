@@ -8,7 +8,7 @@
 |------------|-------------|--------|----------|
 | M01 | Authentication | ✅ | [m01_authentication.md](m01_authentication.md) |
 | M02 | User | ✅ | [m02_user.md](m02_user.md) |
-| M03 | Friendship | 🔄 | [m04_friendship.md](m04_friendship.md) |
+| M03 | Friendship | ✅ | [m03_friendship.md](m03_friendship.md) |
 | M04 | Interest | 🔄 | [m05_interest.md](m05_interest.md) |
 | M05 | Community | 🔄 | [m06_community.md](m06_community.md) |
 | M06 | Events / Meetups | 🔄 | [m06_community.md](m06_community.md#3-events-module) |

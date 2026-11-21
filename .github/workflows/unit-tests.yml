@@ -1,0 +1,39 @@
+
+name: Unit Testing
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    name: Unit Test Suite
+    runs-on: ubuntu-latest  
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Inspect Project Structure
+        run: |
+          echo "Inspecting BuddyAdda project..."
+          find . -maxdepth 3 -type f \
+            \( -name "package.json" \
+            -o -name "pytest.ini" \
+            -o -name "pyproject.toml" \
+            -o -name "pom.xml" \
+            -o -name "*.csproj" \)
+
+      - name: Run Unit Tests
+        run: |
+          echo "Unit testing stage started"
+          echo "Configure framework-specific test commands here"
+
+      - name: Testing Summary
+        if: always()
+        run: |
+          echo "Unit Testing workflow completed"
